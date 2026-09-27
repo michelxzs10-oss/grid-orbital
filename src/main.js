@@ -278,9 +278,7 @@ async function descargar(g) {
   g.cargando = true;
   actualizarListaGrupos();
   try {
-    const { texto, origen } = await cargarGrupo(g.id);
-    const nota = { red: 'recién descargados', cache: 'guardados hace menos de 2 h', 'cache-vieja': 'copia guardada, sin conexión' }[origen];
-    return { texto, nota };
+    return await cargarGrupo(g.id);
   } catch (error) {
     log(`${g.nombre}: no se pudo descargar (${error.message})`, true);
     g.activo = false;

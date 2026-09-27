@@ -1,6 +1,13 @@
 import { CACHE_HORAS } from './config.js';
 
-const urlGrupo = (id) => `/celestrak/NORAD/elements/gp.php?GROUP=${encodeURIComponent(id)}&FORMAT=tle`;
+// Fuentes en orden de preferencia:
+// 1. Copia guardada en el navegador (menos de 2 horas)
+// 2. CelesTrak directo desde el navegador del visitante
+// 3. El proxy de Vite (solo al desarrollar con npm run dev)
+// 4. La copia que el propio sitio publica en /tle/ (npm run tle)
+// 5. Una copia vieja del navegador, si no hubo otra opción
+
+const consulta = (id) => `NORAD/elements/gp.php?GROUP=${encodeURIComponent(id)}&FORMAT=tle`;
 
 function leerCache(id) {
   try {
@@ -18,26 +25,57 @@ function guardarCache(id, texto) {
   }
 }
 
-// Devuelve { texto, origen } donde origen es 'red', 'cache' o 'cache-vieja'
+async function pedir(url) {
+  const respuesta = await fetch(url);
+  const texto = await respuesta.text();
+  if (!respuesta.ok || !/\n1 /.test(texto)) throw new Error(`respuesta ${respuesta.status}`);
+  return texto;
+}
+
+let fechaCopiaSitio = null;
+async function fechaDeCopia() {
+  if (fechaCopiaSitio !== null) return fechaCopiaSitio;
+  try {
+    const meta = await (await fetch('/tle/meta.json')).json();
+    fechaCopiaSitio = new Date(meta.actualizado).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
+  } catch {
+    fechaCopiaSitio = '';
+  }
+  return fechaCopiaSitio;
+}
+
+// Devuelve { texto, nota }
 export async function cargarGrupo(id) {
   const guardado = leerCache(id);
   if (guardado && Date.now() - guardado.t < CACHE_HORAS * 3600e3) {
-    return { texto: guardado.texto, origen: 'cache' };
+    return { texto: guardado.texto, nota: 'guardados hace menos de 2 h' };
+  }
+
+  const intentos = [
+    { url: `https://celestrak.org/${consulta(id)}`, nota: 'recién descargados' },
+  ];
+  if (import.meta.env.DEV) intentos.push({ url: `/celestrak/${consulta(id)}`, nota: 'recién descargados' });
+
+  for (const intento of intentos) {
+    try {
+      const texto = await pedir(intento.url);
+      guardarCache(id, texto);
+      return { texto, nota: intento.nota };
+    } catch {
+      // Se prueba la siguiente fuente
+    }
   }
 
   try {
-    const respuesta = await fetch(urlGrupo(id));
-    const texto = await respuesta.text();
-    if (!respuesta.ok || !/\n1 /.test(texto)) {
-      throw new Error(`CelesTrak respondió ${respuesta.status}`);
-    }
-    guardarCache(id, texto);
-    return { texto, origen: 'red' };
-  } catch (error) {
-    // Sin internet o CelesTrak saturado: usamos lo último que se guardó, aunque sea viejo
-    if (guardado) return { texto: guardado.texto, origen: 'cache-vieja' };
-    throw error;
+    const texto = await pedir(`/tle/${id}.txt`);
+    const fecha = await fechaDeCopia();
+    return { texto, nota: fecha ? `copia del sitio, ${fecha}` : 'copia del sitio' };
+  } catch {
+    // Sin copia publicada para este grupo
   }
+
+  if (guardado) return { texto: guardado.texto, nota: 'copia vieja guardada en el navegador' };
+  throw new Error('ninguna fuente respondió');
 }
 
 // Convierte texto TLE (nombre + línea 1 + línea 2) en una lista de objetos
