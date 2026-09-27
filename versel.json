@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/celestrak/:path*", "destination": "https://celestrak.org/:path*" }
+  ]
+}

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>La Grid orbital</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <canvas id="escena" aria-label="Globo terrestre con satélites en tiempo real"></canvas>
+    <div id="etiqueta" hidden></div>
+
+    <header class="hud titulo">
+      <h1>La Grid orbital</h1>
+      <p class="sub">Satélites reales, calculados en tu navegador</p>
+      <dl class="relojes">
+        <div><dt>Hora local</dt><dd id="hora-local">--:--:--</dd></div>
+        <div><dt>UTC</dt><dd id="hora-utc">--:--:--</dd></div>
+      </dl>
+      <p id="aviso-tiempo" class="aviso" hidden></p>
+    </header>
+
+    <section class="hud panel seleccion" aria-live="polite">
+      <h2 id="sel-nombre">Toca un satélite</h2>
+      <p id="sel-grupo" class="grupo-sel">Sus datos aparecerán aquí</p>
+      <dl class="datos">
+        <div><dt>Latitud</dt><dd id="sel-lat">—</dd></div>
+        <div><dt>Longitud</dt><dd id="sel-lon">—</dd></div>
+        <div><dt>Altitud</dt><dd id="sel-alt">—</dd></div>
+        <div><dt>Velocidad</dt><dd id="sel-vel">—</dd></div>
+        <div><dt>Una vuelta</dt><dd id="sel-per">—</dd></div>
+        <div><dt>Catálogo NORAD</dt><dd id="sel-id">—</dd></div>
+        <div class="ancho"><dt id="sel-elev-dt">Desde tu ubicación</dt><dd id="sel-elev">—</dd></div>
+      </dl>
+      <button id="btn-seguir" type="button" aria-pressed="false">Seguir con la cámara</button>
+    </section>
+
+    <section class="hud panel paso">
+      <h2>Próximo paso de la ISS</h2>
+      <p class="lugar" id="paso-lugar"></p>
+      <p class="cuenta" id="paso-cuenta">Calculando…</p>
+      <dl class="datos">
+        <div><dt>Empieza</dt><dd id="paso-inicio">—</dd></div>
+        <div><dt>Elevación máx.</dt><dd id="paso-max">—</dd></div>
+        <div><dt>Duración</dt><dd id="paso-dur">—</dd></div>
+      </dl>
+    </section>
+
+    <section class="hud panel capas">
+      <h2>Capas</h2>
+      <ul id="lista-grupos"></ul>
+      <p class="total"><span id="total-sats">0</span> satélites en la Grid</p>
+    </section>
+
+    <nav class="hud tiempo" aria-label="Control del tiempo">
+      <button type="button" data-vel="0">Pausa</button>
+      <button type="button" data-vel="1" class="activo">×1</button>
+      <button type="button" data-vel="60">×60</button>
+      <button type="button" data-vel="600">×600</button>
+      <button type="button" data-vel="3600">×3600</button>
+      <button type="button" id="btn-ahora" class="separado">Volver a ahora</button>
+      <button type="button" id="btn-iss">Ir a la ISS</button>
+    </nav>
+
+    <div id="cargador" class="cargador" role="status">
+      <p class="cargador-titulo">Entrando a la Grid</p>
+      <ul id="bitacora"></ul>
+    </div>
+
+    <div id="soltar" class="soltar" hidden>Suelta tu archivo de TLE</div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
