@@ -21,9 +21,9 @@ Quería ver en tiempo real qué satélites pasan sobre mí y entender cómo se c
 
 ## Retos y aprendizajes
 
-- [Ejemplo: entender el formato TLE y la diferencia entre coordenadas ECI y geodésicas]
-- [Ejemplo: mantener 60 fps con miles de objetos en pantalla]
-- [Ejemplo: resolver los problemas de CORS al consumir una API externa]
+- Entender el formato TLE y la diferencia entre coordenadas ECI y geodésicas
+- Mantener 60 fps con miles de objetos en pantalla
+- Resolver los problemas de CORS al consumir una API externa
 
 ## Tecnologías
 
